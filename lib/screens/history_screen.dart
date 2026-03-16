@@ -181,73 +181,90 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 ],
                               ),
                               child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
                                   color: AppTheme.surface,
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(16),
                                   border: Border.all(color: AppTheme.border),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
                                 ),
                                 child: Row(
                                   children: [
+
+                                    // ICON CATEGORY
                                     Container(
-                                      width: 44, height: 44,
+                                      width: 50,
+                                      height: 50,
                                       decoration: BoxDecoration(
                                         color: color.withOpacity(0.15),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: color.withOpacity(0.3)),
+                                        borderRadius: BorderRadius.circular(14),
                                       ),
                                       child: Center(
-                                        child: Text(AppIcons.getIcon(expense.category), style: const TextStyle(fontSize: 20)),
+                                        child: Image.asset(
+                                          AppIcons.getIcon(expense.category),
+                                          width: 24,
+                                          height: 24,
+                                        ),
                                       ),
+
                                     ),
-                                    const SizedBox(width: 12),
+
+                                    const SizedBox(width: 14),
+
+                                    // CATEGORY + NOTE
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
+
                                           Text(
                                             expense.category,
-                                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppTheme.textPrimary,
+                                            ),
                                           ),
+
+                                          const SizedBox(height: 4),
+
                                           if (expense.note.isNotEmpty)
                                             Text(
                                               expense.note,
-                                              style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: AppTheme.textMuted,
+                                              ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
+
                                         ],
                                       ),
                                     ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          CurrencyFormatter.format(expense.amount),
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppTheme.textPrimary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: color.withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            expense.category,
-                                            style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
-                                      ],
+
+                                    const SizedBox(width: 8),
+
+                                    // AMOUNT
+                                    Text(
+                                      CurrencyFormatter.format(expense.amount),
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.redAccent,
+                                      ),
                                     ),
+
                                   ],
                                 ),
-                              ),
+                              )
                             );
                           }),
                         ],
