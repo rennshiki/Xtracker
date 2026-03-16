@@ -298,7 +298,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (cat != null) ...[
-              Text(AppIcons.getIcon(cat), style: const TextStyle(fontSize: 12)),
+              Image.asset(
+                AppIcons.getIcon(cat),
+                width: 14,
+                height: 14,
+              ),
               const SizedBox(width: 4),
             ],
             Text(

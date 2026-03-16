@@ -54,21 +54,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
             surfaceTintColor: Colors.transparent,
             title: Row(
               children: [
-                Container(
-                  width: 32, height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                    borderRadius: BorderRadius.circular(9),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(9),
+                  child: Image.asset(
+                    'assets/icons/logo.png',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.cover,
                   ),
-                  child: const Center(child: Text('💸', style: TextStyle(fontSize: 16))),
                 ),
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('KasCerdas',
+                    const Text('XTracker',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-                    Text('Pencatat Pengeluaran',
+                    Text('Pencatat Pengeluaran Anda',
                         style: TextStyle(fontSize: 10, color: AppTheme.textMuted, letterSpacing: 0.5)),
                   ],
                 ),
@@ -235,8 +236,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  _chartToggle('🥧', true),
-                                  _chartToggle('📊', false),
+                                  _chartToggle('assets/icons/square.png', true),
+                                  _chartToggle('assets/icons/bar.png', false),
                                 ],
                               ),
                             ),
@@ -368,7 +369,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _chartToggle(String icon, bool isPie) {
+  Widget _chartToggle(String iconAsset, bool isPie) {
     final active = _showPie == isPie;
     return GestureDetector(
       onTap: () => setState(() => _showPie = isPie),
@@ -380,11 +381,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderRadius: BorderRadius.circular(7),
           border: active ? Border.all(color: AppTheme.primary.withOpacity(0.5)) : null,
         ),
-        child: Text(icon, style: const TextStyle(fontSize: 15)),
+        child: Image.asset(
+          iconAsset,
+          width: 18,
+          height: 18,
+        ),
       ),
     );
   }
-
   Widget _buildPieChart(List<String> cats, List<double> vals, double total, List<String> allCategories) {
     return Container(
       height: 240,
@@ -512,103 +516,167 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildBarChart(List<String> cats, List<double> vals, List<String> allCategories) {
     final maxVal = vals.isEmpty ? 100.0 : vals.reduce((a, b) => a > b ? a : b);
-    return Container(
-      height: 240,
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      child: BarChart(
-        BarChartData(
-          alignment: BarChartAlignment.spaceEvenly,
-          maxY: maxVal * 1.15,
-          barTouchData: BarTouchData(
-            enabled: true,
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (_) => AppTheme.surfaceHigh.withOpacity(0.95),
-              tooltipBorder: BorderSide(color: AppTheme.border, width: 1),
-              tooltipRoundedRadius: 12,
-              tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                final color = AppTheme.getCategoryColor(cats[groupIndex], allCategories);
-                return BarTooltipItem(
-                  '${cats[groupIndex]}\n',
-                  TextStyle(
-                    color: color,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+    final barWidth = cats.length > 6 ? 18.0 : cats.length > 4 ? 24.0 : 32.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Bar chart
+        SizedBox(
+          height: 220,
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceEvenly,
+              maxY: maxVal * 1.25,
+              barTouchData: BarTouchData(
+                enabled: true,
+                handleBuiltInTouches: true,
+                touchTooltipData: BarTouchTooltipData(
+                  getTooltipColor: (_) => const Color(0xFF2A2A2A),
+                  tooltipBorder: const BorderSide(color: Color(0xFF444444), width: 1),
+                  tooltipRoundedRadius: 12,
+                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  tooltipMargin: 12,
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    final color = AppTheme.getCategoryColor(cats[groupIndex], allCategories);
+                    return BarTooltipItem(
+                      '',
+                      const TextStyle(),
+                      children: [
+                        TextSpan(
+                          text: '${cats[groupIndex]}\n',
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        TextSpan(
+                          text: CurrencyFormatter.formatCompact(vals[groupIndex]),
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              titlesData: FlTitlesData(
+                // Label atas: nilai nominal
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 28,
+                    getTitlesWidget: (value, meta) {
+                      final i = value.toInt();
+                      if (i < 0 || i >= vals.length) return const SizedBox();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          CurrencyFormatter.formatCompact(vals[i]),
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.getCategoryColor(cats[i], allCategories)
+                                .withOpacity(0.9),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  children: [
-                    TextSpan(
-                      text: CurrencyFormatter.formatCompact(vals[groupIndex]),
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                ),
+                // Label bawah: icon kategori
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 44,
+                    getTitlesWidget: (value, meta) {
+                      final i = value.toInt();
+                      if (i < 0 || i >= cats.length) return const SizedBox();
+                      final color = AppTheme.getCategoryColor(cats[i], allCategories);
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 8),
+                          Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: color.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: color.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Image.asset(
+                                AppIcons.getIcon(cats[i]),
+                                width: 18,
+                                height: 18,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              ),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: maxVal * 0.33,
+                getDrawingHorizontalLine: (value) => FlLine(
+                  color: AppTheme.border.withOpacity(0.25),
+                  strokeWidth: 1,
+                  dashArray: [4, 6],
+                ),
+              ),
+              borderData: FlBorderData(show: false),
+              barGroups: cats.asMap().entries.map((entry) {
+                final i = entry.key;
+                final color = AppTheme.getCategoryColor(cats[i], allCategories);
+                return BarChartGroupData(
+                  x: i,
+                  barRods: [
+                    BarChartRodData(
+                      toY: vals[i],
+                      gradient: LinearGradient(
+                        colors: [
+                          color,
+                          color.withOpacity(0.75),
+                          color.withOpacity(0.4),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                      width: barWidth,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(10),
+                      ),
+                      backDrawRodData: BackgroundBarChartRodData(
+                        show: true,
+                        toY: maxVal * 1.25,
+                        color: color.withOpacity(0.07),
                       ),
                     ),
                   ],
                 );
-              },
+              }).toList(),
             ),
+            swapAnimationDuration: const Duration(milliseconds: 400),
+            swapAnimationCurve: Curves.easeInOutCubic,
           ),
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 32,
-                getTitlesWidget: (value, meta) {
-                  final i = value.toInt();
-                  if (i < 0 || i >= cats.length) return const SizedBox();
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Image.asset(
-                      AppIcons.getIcon(cats[i]),
-                      width: 20,
-                      height: 20,
-                    ),
-                  );
-                },
-              ),
-            ),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          ),
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-            horizontalInterval: maxVal * 0.25,
-            getDrawingHorizontalLine: (value) => FlLine(
-              color: AppTheme.border.withOpacity(0.3),
-              strokeWidth: 1,
-              dashArray: [5, 5],
-            ),
-          ),
-          borderData: FlBorderData(show: false),
-          barGroups: cats.asMap().entries.map((entry) {
-            final i = entry.key;
-            final color = AppTheme.getCategoryColor(cats[i], allCategories);
-            return BarChartGroupData(
-              x: i,
-              barRods: [
-                BarChartRodData(
-                  toY: vals[i],
-                  gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.6)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  width: cats.length > 5 ? 20 : 28,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                  backDrawRodData: BackgroundBarChartRodData(
-                    show: true,
-                    toY: maxVal * 1.15,
-                    color: color.withOpacity(0.06),
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
         ),
-      ),
+      ],
     );
   }
 }
