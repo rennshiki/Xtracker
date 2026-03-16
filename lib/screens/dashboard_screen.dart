@@ -36,6 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ExpenseProvider>();
+    final allCategories = provider.allCategories;
     final total = provider.getTotalForMonth(_selectedMonth.year, _selectedMonth.month);
     final categoryTotals = provider.getCategoryTotalsForMonth(_selectedMonth.year, _selectedMonth.month);
     final categories = categoryTotals.keys.toList();
@@ -56,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Container(
                   width: 32, height: 32,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 255, 255, 255),  // or any single color you want
+                    color: const Color.fromARGB(255, 255, 255, 255),
                     borderRadius: BorderRadius.circular(9),
                   ),
                   child: const Center(child: Text('💸', style: TextStyle(fontSize: 16))),
@@ -227,7 +228,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             const Text('Breakdown Kategori',
                                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-                            // Chart toggle
                             Container(
                               decoration: BoxDecoration(
                                 color: AppTheme.surfaceHigh,
@@ -245,18 +245,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 20),
 
                         if (_showPie)
-                          _buildPieChart(categories, values, total)
+                          _buildPieChart(categories, values, total, allCategories)
                         else
-                          _buildBarChart(categories, values),
+                          _buildBarChart(categories, values, allCategories),
 
                         const SizedBox(height: 20),
-                        // Legend dengan design lebih menarik
+
+                        // Legend
                         ...categories.asMap().entries.map((entry) {
                           final i = entry.key;
                           final cat = entry.value;
                           final val = values[i];
                           final pct = total > 0 ? (val / total * 100).toStringAsFixed(1) : '0';
-                          final color = AppTheme.chartColors[i % AppTheme.chartColors.length];
+                          // Warna tetap berdasarkan posisi kategori di allCategories
+                          final color = AppTheme.getCategoryColor(cat, allCategories);
                           return Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.all(12),
@@ -383,14 +385,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildPieChart(List<String> cats, List<double> vals, double total) {
+  Widget _buildPieChart(List<String> cats, List<double> vals, double total, List<String> allCategories) {
     return Container(
       height: 240,
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Shadow layer untuk depth
           Container(
             width: 180,
             height: 180,
@@ -405,7 +406,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
-          // Pie Chart
           PieChart(
             PieChartData(
               sectionsSpace: 2,
@@ -426,7 +426,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final cat = entry.value;
                 final val = vals[i];
                 final isTouched = _touchedIndex == i;
-                final color = AppTheme.chartColors[i % AppTheme.chartColors.length];
+                // Warna tetap berdasarkan posisi di allCategories
+                final color = AppTheme.getCategoryColor(cat, allCategories);
                 return PieChartSectionData(
                   value: val,
                   gradient: LinearGradient(
@@ -445,7 +446,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               centerSpaceColor: AppTheme.surface,
             ),
           ),
-          // Center info
           if (_touchedIndex >= 0 && _touchedIndex < cats.length)
             Container(
               padding: const EdgeInsets.all(12),
@@ -468,7 +468,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.chartColors[_touchedIndex % AppTheme.chartColors.length],
+                      color: AppTheme.getCategoryColor(cats[_touchedIndex], allCategories),
                     ),
                   ),
                 ],
@@ -510,7 +510,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildBarChart(List<String> cats, List<double> vals) {
+  Widget _buildBarChart(List<String> cats, List<double> vals, List<String> allCategories) {
     final maxVal = vals.isEmpty ? 100.0 : vals.reduce((a, b) => a > b ? a : b);
     return Container(
       height: 240,
@@ -527,7 +527,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               tooltipRoundedRadius: 12,
               tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                final color = AppTheme.chartColors[groupIndex % AppTheme.chartColors.length];
+                final color = AppTheme.getCategoryColor(cats[groupIndex], allCategories);
                 return BarTooltipItem(
                   '${cats[groupIndex]}\n',
                   TextStyle(
@@ -585,7 +585,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderData: FlBorderData(show: false),
           barGroups: cats.asMap().entries.map((entry) {
             final i = entry.key;
-            final color = AppTheme.chartColors[i % AppTheme.chartColors.length];
+            final color = AppTheme.getCategoryColor(cats[i], allCategories);
             return BarChartGroupData(
               x: i,
               barRods: [

@@ -31,7 +31,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ExpenseProvider>();
+    final allCategories = provider.allCategories;
     var monthExpenses = provider.getExpensesForMonth(_selectedMonth.year, _selectedMonth.month);
+    final categoryTotals = provider.getCategoryTotalsForMonth(_selectedMonth.year, _selectedMonth.month);
 
     if (_filterCategory != null) {
       monthExpenses = monthExpenses.where((e) => e.category == _filterCategory).toList();
@@ -44,7 +46,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       grouped[key] = [...(grouped[key] ?? []), e];
     }
 
-    final categories = provider.getCategoryTotalsForMonth(_selectedMonth.year, _selectedMonth.month).keys.toList();
+    final categories = categoryTotals.keys.toList();
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
@@ -96,8 +98,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _filterChip('Semua', null),
-                    ...categories.map((cat) => _filterChip(cat, cat)),
+                    _filterChip('Semua', null, allCategories),
+                    ...categories.map((cat) => _filterChip(cat, cat, allCategories)),
                   ],
                 ),
               ),
@@ -160,11 +162,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                           ),
                           // Expense items
-                          ...dayExpenses.asMap().entries.map((entry) {
-                            final expense = entry.value;
-                            final allCats = provider.allCategories;
-                            final catIdx = allCats.indexOf(expense.category);
-                            final color = AppTheme.chartColors[catIdx.clamp(0, AppTheme.chartColors.length - 1) % AppTheme.chartColors.length];
+                          ...dayExpenses.map((expense) {
+                            // Warna tetap berdasarkan posisi kategori di allCategories
+                            final color = AppTheme.getCategoryColor(expense.category, allCategories);
+
                             return Slidable(
                               key: Key(expense.id),
                               endActionPane: ActionPane(
@@ -213,7 +214,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                           height: 24,
                                         ),
                                       ),
-
                                     ),
 
                                     const SizedBox(width: 14),
@@ -264,7 +264,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
                                   ],
                                 ),
-                              )
+                              ),
                             );
                           }),
                         ],
@@ -277,8 +277,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _filterChip(String label, String? cat) {
+  Widget _filterChip(String label, String? cat, List<String> allCategories) {
     final selected = _filterCategory == cat;
+    final color = cat != null
+        ? AppTheme.getCategoryColor(cat, allCategories)
+        : AppTheme.primary;
+
     return GestureDetector(
       onTap: () => setState(() => _filterCategory = cat),
       child: AnimatedContainer(
@@ -286,9 +290,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.primary.withOpacity(0.2) : AppTheme.surfaceHigh,
+          color: selected ? color.withOpacity(0.2) : AppTheme.surfaceHigh,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? AppTheme.primary : AppTheme.border),
+          border: Border.all(color: selected ? color : AppTheme.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -302,7 +306,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: selected ? AppTheme.primary : AppTheme.textSecondary,
+                color: selected ? color : AppTheme.textSecondary,
               ),
             ),
           ],

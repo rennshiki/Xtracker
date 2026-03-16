@@ -27,17 +27,24 @@ class AppTheme {
 
   // Chart colors
   static const List<Color> chartColors = [
-    Color(0xFF00C853),
-    Color(0xFF2979FF),
-    Color(0xFFFFC107),
-    Color(0xFFFF5252),
-    Color(0xFF00BCD4),
-    Color(0xFF8BC34A),
-    Color(0xFF9C27B0),
-    Color(0xFFFF9800),
-    Color(0xFF03A9F4),
-    Color(0xFFE91E63),
+    Color(0xFF00C853), // 0 - Makan        → Hijau
+    Color(0xFF2979FF), // 1 - Transport     → Biru
+    Color(0xFFFFC107), // 2 - Belanja       → Kuning
+    Color(0xFFFF5252), // 3 - Hiburan       → Merah
+    Color(0xFF00BCD4), // 4 - Kesehatan     → Cyan
+    Color(0xFF8BC34A), // 5 - Tagihan       → Hijau Muda
+    Color(0xFF9C27B0), // 6 - Pendidikan    → Ungu
+    Color(0xFFFF9800), // 7 - Bensin        → Orange
+    Color(0xFF03A9F4), // 8 - Game          → Biru Muda
+    Color(0xFFE91E63), // 9 - Lainnya       → Pink
   ];
+
+  // Warna tetap berdasarkan nama kategori (tidak berubah tiap bulan)
+  static Color getCategoryColor(String category, List<String> allCategories) {
+    final idx = allCategories.indexOf(category);
+    if (idx < 0) return chartColors[0];
+    return chartColors[idx % chartColors.length];
+  }
 
   static Color categoryColor(String cat, int index) {
     final colors = chartColors;
@@ -80,7 +87,6 @@ class AppTheme {
           ),
         ),
 
-
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: primary,
           foregroundColor: Colors.white,
@@ -112,6 +118,6 @@ class AppIcons {
   };
 
   static String getIcon(String category) {
-  return categoryIcons[category] ?? 'assets/icons/cateogory.png';
+    return categoryIcons[category] ?? 'assets/icons/cateogory.png';
   }
 }
