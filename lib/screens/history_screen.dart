@@ -151,7 +151,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   ),
                                 ),
                                 Text(
-                                  CurrencyFormatter.formatCompact(dayTotal),
+                                  CurrencyFormatter.format(dayTotal),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,

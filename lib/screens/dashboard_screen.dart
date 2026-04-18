@@ -227,7 +227,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Breakdown Kategori',
+                            const Text('Kategori',
                                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
                             Container(
                               decoration: BoxDecoration(
@@ -311,7 +311,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        CurrencyFormatter.formatCompact(val),
+                                        CurrencyFormatter.format(val),
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: AppTheme.textSecondary,
@@ -535,8 +535,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   getTooltipColor: (_) => const Color(0xFF2A2A2A),
                   tooltipBorder: const BorderSide(color: Color(0xFF444444), width: 1),
                   tooltipRoundedRadius: 12,
-                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  tooltipMargin: 12,
+                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  tooltipMargin: 8,
+                  maxContentWidth: 100,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     final color = AppTheme.getCategoryColor(cats[groupIndex], allCategories);
                     return BarTooltipItem(
