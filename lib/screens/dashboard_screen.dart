@@ -146,10 +146,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF2D1F6E), Color(0xFF1A1230)],
+                      colors: [AppTheme.cardGradientStart, AppTheme.cardGradientEnd],
                     ),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF3D2A8A)),
+                    border: Border.all(color: AppTheme.cardBorder),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,8 +236,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  _chartToggle('assets/icons/square.png', true),
-                                  _chartToggle('assets/icons/bar.png', false),
+                                  _chartToggle(Icons.donut_large_rounded, true),
+                                  _chartToggle(Icons.bar_chart_rounded, false),
                                 ],
                               ),
                             ),
@@ -369,7 +369,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _chartToggle(String iconAsset, bool isPie) {
+  Widget _chartToggle(IconData icon, bool isPie) {
     final active = _showPie == isPie;
     return GestureDetector(
       onTap: () => setState(() => _showPie = isPie),
@@ -381,10 +381,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderRadius: BorderRadius.circular(7),
           border: active ? Border.all(color: AppTheme.primary.withOpacity(0.5)) : null,
         ),
-        child: Image.asset(
-          iconAsset,
-          width: 18,
-          height: 18,
+        child: Icon(
+          icon,
+          size: 18,
+          color: active ? AppTheme.primary : AppTheme.textMuted,
         ),
       ),
     );
@@ -452,14 +452,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           if (_touchedIndex >= 0 && _touchedIndex < cats.length)
             Container(
-              padding: const EdgeInsets.all(12),
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 color: AppTheme.surfaceHigh,
                 shape: BoxShape.circle,
                 border: Border.all(color: AppTheme.border, width: 2),
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
                     AppIcons.getIcon(cats[_touchedIndex]),
@@ -480,17 +482,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
             )
           else
             Container(
-              padding: const EdgeInsets.all(16),
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 color: AppTheme.surfaceHigh,
                 shape: BoxShape.circle,
                 border: Border.all(color: AppTheme.border, width: 2),
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text('💰', style: TextStyle(fontSize: 24)),
-                  const SizedBox(height: 4),
+                  Image.asset(
+                    'assets/icons/category.png',
+                    width: 28,
+                    height: 28,
+                  ),
+                  const SizedBox(height: 2),
                   Text(
                     '${cats.length}',
                     style: const TextStyle(
@@ -501,7 +509,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   Text(
                     'kategori',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 9,
                       color: AppTheme.textMuted,
                     ),
@@ -516,28 +524,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildBarChart(List<String> cats, List<double> vals, List<String> allCategories) {
     final maxVal = vals.isEmpty ? 100.0 : vals.reduce((a, b) => a > b ? a : b);
-    final barWidth = cats.length > 6 ? 18.0 : cats.length > 4 ? 24.0 : 32.0;
+    final barWidth = cats.length > 6 ? 16.0 : cats.length > 4 ? 22.0 : 30.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Bar chart
         SizedBox(
-          height: 220,
+          height: 240,
           child: BarChart(
             BarChartData(
               alignment: BarChartAlignment.spaceEvenly,
-              maxY: maxVal * 1.25,
+              maxY: maxVal * 1.3,
               barTouchData: BarTouchData(
                 enabled: true,
                 handleBuiltInTouches: true,
                 touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (_) => const Color(0xFF2A2A2A),
-                  tooltipBorder: const BorderSide(color: Color(0xFF444444), width: 1),
-                  tooltipRoundedRadius: 12,
+                  getTooltipColor: (_) => AppTheme.surfaceHigh,
+                  tooltipBorder: const BorderSide(color: AppTheme.border, width: 1),
+                  tooltipRoundedRadius: 10,
                   tooltipPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  tooltipMargin: 8,
-                  maxContentWidth: 100,
+                  tooltipMargin: 6,
+                  maxContentWidth: 110,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     final color = AppTheme.getCategoryColor(cats[groupIndex], allCategories);
                     return BarTooltipItem(
@@ -548,16 +555,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           text: '${cats[groupIndex]}\n',
                           style: TextStyle(
                             color: color,
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            letterSpacing: 0.3,
                           ),
                         ),
                         TextSpan(
                           text: CurrencyFormatter.formatCompact(vals[groupIndex]),
                           style: const TextStyle(
                             color: AppTheme.textPrimary,
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -567,80 +573,104 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               titlesData: FlTitlesData(
-                // Label atas: nilai nominal
+                // Nilai di atas bar
                 topTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    reservedSize: 28,
+                    reservedSize: 24,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
                       if (i < 0 || i >= vals.length) return const SizedBox();
+                      final color = AppTheme.getCategoryColor(cats[i], allCategories);
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.only(bottom: 6),
                         child: Text(
                           CurrencyFormatter.formatCompact(vals[i]),
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.getCategoryColor(cats[i], allCategories)
-                                .withOpacity(0.9),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: color,
                           ),
                         ),
                       );
                     },
                   ),
                 ),
-                // Label bawah: icon kategori
+                // Icon kategori di bawah bar
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    reservedSize: 44,
+                    reservedSize: 48,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
                       if (i < 0 || i >= cats.length) return const SizedBox();
                       final color = AppTheme.getCategoryColor(cats[i], allCategories);
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 8),
-                          Container(
-                            width: 30,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: color.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: color.withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: Center(
-                              child: Image.asset(
-                                AppIcons.getIcon(cats[i]),
-                                width: 18,
-                                height: 18,
-                              ),
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: color.withOpacity(0.35),
+                              width: 1,
                             ),
                           ),
-                        ],
+                          child: Center(
+                            child: Image.asset(
+                              AppIcons.getIcon(cats[i]),
+                              width: 20,
+                              height: 20,
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
                 ),
-                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 42,
+                    interval: maxVal * 0.5,
+                    getTitlesWidget: (value, meta) {
+                      if (value == 0) return const SizedBox();
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Text(
+                          CurrencyFormatter.formatCompact(value),
+                          style: const TextStyle(
+                            fontSize: 9,
+                            color: AppTheme.textMuted,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
                 rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
-                horizontalInterval: maxVal * 0.33,
+                horizontalInterval: maxVal * 0.5,
                 getDrawingHorizontalLine: (value) => FlLine(
-                  color: AppTheme.border.withOpacity(0.25),
+                  color: AppTheme.border.withOpacity(0.3),
                   strokeWidth: 1,
                   dashArray: [4, 6],
                 ),
               ),
-              borderData: FlBorderData(show: false),
+              borderData: FlBorderData(
+                show: true,
+                border: Border(
+                  bottom: BorderSide(color: AppTheme.border.withOpacity(0.4), width: 1),
+                  left: BorderSide(color: AppTheme.border.withOpacity(0.4), width: 1),
+                ),
+              ),
               barGroups: cats.asMap().entries.map((entry) {
                 final i = entry.key;
                 final color = AppTheme.getCategoryColor(cats[i], allCategories);
@@ -649,24 +679,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   barRods: [
                     BarChartRodData(
                       toY: vals[i],
-                      gradient: LinearGradient(
-                        colors: [
-                          color,
-                          color.withOpacity(0.75),
-                          color.withOpacity(0.4),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
+                      color: color,
                       width: barWidth,
                       borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(10),
+                        top: Radius.circular(6),
+                        bottom: Radius.zero,
                       ),
                       backDrawRodData: BackgroundBarChartRodData(
                         show: true,
-                        toY: maxVal * 1.25,
-                        color: color.withOpacity(0.07),
+                        toY: maxVal * 1.3,
+                        color: color.withOpacity(0.06),
                       ),
                     ),
                   ],

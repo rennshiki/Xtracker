@@ -258,7 +258,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.redAccent,
+                                        color: AppTheme.danger,
                                       ),
                                     ),
 

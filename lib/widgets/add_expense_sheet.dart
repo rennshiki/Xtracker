@@ -19,6 +19,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
   String? _selectedCategory;
   bool _useCustom = false;
   DateTime _selectedDate = DateTime.now();
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -48,19 +49,29 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
+  void _setError(String msg) {
+    setState(() => _errorMessage = msg);
+  }
+
+  void _clearError() {
+    if (_errorMessage != null) setState(() => _errorMessage = null);
+  }
+
   void _submit() {
     final cat = _useCustom ? _customCatCtrl.text.trim() : _selectedCategory;
     final amountText = _amountCtrl.text.replaceAll('.', '').replaceAll(',', '');
     final amount = double.tryParse(amountText);
 
     if (amount == null || amount <= 0) {
-      _showError('Masukkan jumlah yang valid');
+      _setError('Masukkan jumlah yang valid');
       return;
     }
     if (cat == null || cat.isEmpty) {
-      _showError('Pilih atau tulis kategori');
+      _setError('Pilih atau tulis kategori');
       return;
     }
+
+    _clearError();
 
     context.read<ExpenseProvider>().addExpense(
           amount: amount,
@@ -70,21 +81,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
         );
 
     Navigator.pop(context);
-    _showSuccess();
-  }
 
-  void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: AppTheme.danger,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-
-  void _showSuccess() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Row(
@@ -130,31 +127,52 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
             ),
             const SizedBox(height: 20),
 
-            // Title
-            Row(
-              children: [
-                Container(
-                  width: 36, height: 36,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppTheme.primary, AppTheme.accent],
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Tambah Pengeluaran',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-              ],
+            // Title — tanpa kotak gradien
+            const Text(
+              'Tambah Pengeluaran',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 24),
+
+            // Error banner inline
+            if (_errorMessage != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppTheme.danger.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.danger.withOpacity(0.4)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline_rounded,
+                        color: AppTheme.danger, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(
+                          color: AppTheme.danger,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _clearError,
+                      child: const Icon(Icons.close_rounded,
+                          color: AppTheme.danger, size: 16),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Amount Input
             _label('💰 Jumlah'),
@@ -163,7 +181,11 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
               decoration: BoxDecoration(
                 color: AppTheme.surfaceHigh,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppTheme.border),
+                border: Border.all(
+                  color: (_errorMessage != null && _errorMessage!.contains('jumlah'))
+                      ? AppTheme.danger.withOpacity(0.6)
+                      : AppTheme.border,
+                ),
               ),
               child: Row(
                 children: [
@@ -180,6 +202,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                       controller: _amountCtrl,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: (_) => _clearError(),
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -202,12 +225,11 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
             _label('📂 Kategori'),
             const SizedBox(height: 8),
 
-            // Toggle custom
             Row(
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => setState(() => _useCustom = false),
+                    onTap: () => setState(() { _useCustom = false; _clearError(); }),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -232,7 +254,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => setState(() => _useCustom = true),
+                    onTap: () => setState(() { _useCustom = true; _clearError(); }),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -243,7 +265,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                         ),
                       ),
                       child: Text(
-                        '+ Tulis Sendiri',
+                        'Tulis Sendiri',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12,
@@ -266,7 +288,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                   final selected = _selectedCategory == cat;
                   final idx = categories.indexOf(cat);
                   return GestureDetector(
-                    onTap: () => setState(() => _selectedCategory = cat),
+                    onTap: () => setState(() { _selectedCategory = cat; _clearError(); }),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -282,29 +304,27 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                           width: selected ? 1.5 : 1,
                         ),
                       ),
-                      child:
-                      Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.asset(
-                              AppIcons.getIcon(cat),
-                              width: 16,
-                              height: 16,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            AppIcons.getIcon(cat),
+                            width: 16,
+                            height: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            cat,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                              color: selected
+                                  ? AppTheme.chartColors[idx % AppTheme.chartColors.length]
+                                  : AppTheme.textSecondary,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              cat,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                                color: selected
-                                    ? AppTheme.chartColors[idx % AppTheme.chartColors.length]
-                                    : AppTheme.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }).toList(),
@@ -319,6 +339,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 child: TextField(
                   controller: _customCatCtrl,
                   style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15),
+                  onChanged: (_) => _clearError(),
                   decoration: const InputDecoration(
                     hintText: 'Contoh: Kopi, Nongkrong, Arisan...',
                     hintStyle: TextStyle(color: AppTheme.textMuted, fontSize: 14),
