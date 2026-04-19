@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
         title: 'Expense Tracker',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
+        scrollBehavior: const ScrollBehavior().copyWith(overscroll: false),
         home: const HomeScreen(),
       ),
     );

@@ -3,35 +3,49 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
 
-  // ─── Background & Surface ─────────────────────────────────────────────────
-  // Deep navy-slate dark theme — warmer and less harsh than pure black
-  static const bg           = Color(0xFF0D0F14); // near-black with blue undertone
-  static const surface      = Color(0xFF161A23); // card surface
-  static const surfaceHigh  = Color(0xFF1E2330); // elevated surface / input
-  static const border       = Color(0xFF252B3B); // subtle border
+  // Background & Surface
+  // Sebelum: #121212 (pure black)
+  static const bg          = Color(0xFF0D0F14);
+  // Sebelum: #1E1E1E
+  static const surface     = Color(0xFF161A23);
+  // Sebelum: #2A2A2A
+  static const surfaceHigh = Color(0xFF1E2330);
+  // Sebelum: #333333
+  static const border      = Color(0xFF252B3B);
 
-  // ─── Primary — Violet/Indigo ───────────────────────────────────────────────
-  static const primary      = Color(0xFF7C6FF7); // soft violet
-  static const primaryLight = Color(0xFFAFA6FC); // lighter tint for text/badges
+  // Primary
+  // Sebelum: #00C853 (hijau neon)
+  static const primary      = Color(0xFF7C6FF7);
+  // Sebelum: #69F0AE (hijau muda)
+  static const primaryLight = Color(0xFFAFA6FC);
 
-  // ─── Accent — Teal ────────────────────────────────────────────────────────
-  static const accent = Color(0xFF38C7B0); // muted teal
+  // Accent
+  // Sebelum: #2979FF (biru terang)
+  static const accent = Color(0xFF38C7B0);
 
-  // ─── Text ─────────────────────────────────────────────────────────────────
+  // Text
+  // Sebelum: #FFFFFF (pure white)
   static const textPrimary   = Color(0xFFF0F2F8);
+  // Sebelum: #B0B0B0
   static const textSecondary = Color(0xFF8B93A8);
+  // Sebelum: #808080
   static const textMuted     = Color(0xFF4E5568);
 
-  // ─── Status ───────────────────────────────────────────────────────────────
-  static const success = Color(0xFF34D399); // emerald green
-  static const danger  = Color(0xFFF87171); // soft coral
+  // Status
+  // Sebelum: #00E676 (neon green)
+  static const success = Color(0xFF34D399);
+  // Sebelum: #FF5252 (merah terang)
+  static const danger  = Color(0xFFF87171);
 
-  // ─── Total card gradient ──────────────────────────────────────────────────
+  // Gradient kartu total pengeluaran
+  // Sebelum: hardcoded di dashboard_screen.dart sebagai Color(0xFF2D1F6E) & Color(0xFF1A1230)
   static const cardGradientStart = Color(0xFF1E1852);
   static const cardGradientEnd   = Color(0xFF0F0D2E);
+  // Sebelum: hardcoded Color(0xFF3D2A8A)
   static const cardBorder        = Color(0xFF342D7A);
 
-  // ─── Chart / Category colors ──────────────────────────────────────────────
+  // Warna chart per kategori
+  // Sebelum: semua warna neon (hijau, biru terang, kuning keras, dll)
   static const List<Color> chartColors = [
     Color(0xFF7C6FF7), // 0 - Makan        → Violet
     Color(0xFF38C7B0), // 1 - Transport     → Teal
@@ -45,7 +59,6 @@ class AppTheme {
     Color(0xFFF472B6), // 9 - Lainnya       → Soft pink
   ];
 
-  // Warna tetap berdasarkan nama kategori (tidak berubah tiap bulan)
   static Color getCategoryColor(String category, List<String> allCategories) {
     final idx = allCategories.indexOf(category);
     if (idx < 0) return chartColors[0];
@@ -53,8 +66,7 @@ class AppTheme {
   }
 
   static Color categoryColor(String cat, int index) {
-    final colors = chartColors;
-    return colors[index % colors.length];
+    return chartColors[index % chartColors.length];
   }
 
   static ThemeData get theme => ThemeData(
@@ -137,16 +149,16 @@ class AppTheme {
 
 class AppIcons {
   static const categoryIcons = {
-    'Makan': 'assets/icons/food.png',
-    'Transport': 'assets/icons/transport.png',
-    'Belanja': 'assets/icons/shopping.png',
-    'Hiburan': 'assets/icons/entertainment.png',
-    'Kesehatan': 'assets/icons/health.png',
-    'Tagihan': 'assets/icons/bill.png',
-    'Pendidikan': 'assets/icons/education.png',
-    'Bensin': 'assets/icons/fuel.png',
-    'Game': 'assets/icons/game.png',
-    'Lainnya': 'assets/icons/other.png',
+    'Makan'      : 'assets/icons/food.png',
+    'Transport'  : 'assets/icons/transport.png',
+    'Belanja'    : 'assets/icons/shopping.png',
+    'Hiburan'    : 'assets/icons/entertainment.png',
+    'Kesehatan'  : 'assets/icons/health.png',
+    'Tagihan'    : 'assets/icons/bill.png',
+    'Pendidikan' : 'assets/icons/education.png',
+    'Bensin'     : 'assets/icons/fuel.png',
+    'Game'       : 'assets/icons/game.png',
+    'Lainnya'    : 'assets/icons/other.png',
   };
 
   static String getIcon(String category) {

@@ -170,6 +170,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               key: Key(expense.id),
                               endActionPane: ActionPane(
                                 motion: const DrawerMotion(),
+                                extentRatio: 0.25,
                                 children: [
                                   SlidableAction(
                                     onPressed: (_) => _confirmDelete(context, provider, expense.id),
