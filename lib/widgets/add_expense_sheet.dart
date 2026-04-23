@@ -15,9 +15,7 @@ class AddExpenseSheet extends StatefulWidget {
 class _AddExpenseSheetState extends State<AddExpenseSheet> {
   final _amountCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
-  final _customCatCtrl = TextEditingController();
   String? _selectedCategory;
-  bool _useCustom = false;
   DateTime _selectedDate = DateTime.now();
   String? _errorMessage;
 
@@ -25,7 +23,6 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
   void dispose() {
     _amountCtrl.dispose();
     _noteCtrl.dispose();
-    _customCatCtrl.dispose();
     super.dispose();
   }
 
@@ -58,7 +55,6 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
   }
 
   void _submit() {
-    final cat = _useCustom ? _customCatCtrl.text.trim() : _selectedCategory;
     final amountText = _amountCtrl.text.replaceAll('.', '').replaceAll(',', '');
     final amount = double.tryParse(amountText);
 
@@ -66,8 +62,8 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
       _setError('Masukkan jumlah yang valid');
       return;
     }
-    if (cat == null || cat.isEmpty) {
-      _setError('Pilih atau tulis kategori');
+    if (_selectedCategory == null || _selectedCategory!.isEmpty) {
+      _setError('Pilih kategori terlebih dahulu');
       return;
     }
 
@@ -75,7 +71,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
 
     context.read<ExpenseProvider>().addExpense(
           amount: amount,
-          category: cat,
+          category: _selectedCategory!,
           date: _selectedDate,
           note: _noteCtrl.text.trim(),
         );
@@ -127,7 +123,6 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
             ),
             const SizedBox(height: 20),
 
-            // Title — tanpa kotak gradien
             const Text(
               'Tambah Pengeluaran',
               style: TextStyle(
@@ -150,8 +145,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline_rounded,
-                        color: AppTheme.danger, size: 18),
+                    const Icon(Icons.error_outline_rounded, color: AppTheme.danger, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -165,8 +159,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                     ),
                     GestureDetector(
                       onTap: _clearError,
-                      child: const Icon(Icons.close_rounded,
-                          color: AppTheme.danger, size: 16),
+                      child: const Icon(Icons.close_rounded, color: AppTheme.danger, size: 16),
                     ),
                   ],
                 ),
@@ -174,13 +167,14 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
               const SizedBox(height: 16),
             ],
 
-            // Amount Input
+            // Amount input
             _label('💰 Jumlah'),
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
                 color: AppTheme.surfaceHigh,
                 borderRadius: BorderRadius.circular(14),
+                // Sebelum: selalu AppTheme.border — sekarang merah saat error jumlah
                 border: Border.all(
                   color: (_errorMessage != null && _errorMessage!.contains('jumlah'))
                       ? AppTheme.danger.withOpacity(0.6)
@@ -221,139 +215,56 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Category
+            // Kategori
             _label('📂 Kategori'),
-            const SizedBox(height: 8),
-
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() { _useCustom = false; _clearError(); }),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: !_useCustom ? AppTheme.primary.withOpacity(0.2) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: !_useCustom ? AppTheme.primary : AppTheme.border,
-                        ),
-                      ),
-                      child: Text(
-                        'Pilih Kategori',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: !_useCustom ? AppTheme.primary : AppTheme.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() { _useCustom = true; _clearError(); }),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _useCustom ? AppTheme.primary.withOpacity(0.2) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: _useCustom ? AppTheme.primary : AppTheme.border,
-                        ),
-                      ),
-                      child: Text(
-                        'Tulis Sendiri',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: _useCustom ? AppTheme.primary : AppTheme.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 10),
-
-            if (!_useCustom) ...[
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: categories.map((cat) {
-                  final selected = _selectedCategory == cat;
-                  final idx = categories.indexOf(cat);
-                  return GestureDetector(
-                    onTap: () => setState(() { _selectedCategory = cat; _clearError(); }),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: categories.map((cat) {
+                final selected = _selectedCategory == cat;
+                final idx = categories.indexOf(cat);
+                return GestureDetector(
+                  onTap: () => setState(() { _selectedCategory = cat; _clearError(); }),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppTheme.chartColors[idx % AppTheme.chartColors.length].withOpacity(0.25)
+                          : AppTheme.surfaceHigh,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
                         color: selected
-                            ? AppTheme.chartColors[idx % AppTheme.chartColors.length].withOpacity(0.25)
-                            : AppTheme.surfaceHigh,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: selected
-                              ? AppTheme.chartColors[idx % AppTheme.chartColors.length]
-                              : AppTheme.border,
-                          width: selected ? 1.5 : 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            AppIcons.getIcon(cat),
-                            width: 16,
-                            height: 16,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            cat,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                              color: selected
-                                  ? AppTheme.chartColors[idx % AppTheme.chartColors.length]
-                                  : AppTheme.textSecondary,
-                            ),
-                          ),
-                        ],
+                            ? AppTheme.chartColors[idx % AppTheme.chartColors.length]
+                            : AppTheme.border,
+                        width: selected ? 1.5 : 1,
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
-            ] else ...[
-              Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceHigh,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppTheme.border),
-                ),
-                child: TextField(
-                  controller: _customCatCtrl,
-                  style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15),
-                  onChanged: (_) => _clearError(),
-                  decoration: const InputDecoration(
-                    hintText: 'Contoh: Kopi, Nongkrong, Arisan...',
-                    hintStyle: TextStyle(color: AppTheme.textMuted, fontSize: 14),
-                    border: InputBorder.none,
-                    prefixIcon: Icon(Icons.edit_rounded, color: AppTheme.primary, size: 18),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(AppIcons.getIcon(cat), width: 16, height: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          cat,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                            color: selected
+                                ? AppTheme.chartColors[idx % AppTheme.chartColors.length]
+                                : AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            ],
-
+                );
+              }).toList(),
+            ),
             const SizedBox(height: 16),
 
-            // Date Picker
+            // Date picker
             _label('📅 Tanggal'),
             const SizedBox(height: 8),
             GestureDetector(
@@ -381,7 +292,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Note
+            // Catatan
             _label('📝 Catatan (opsional)'),
             const SizedBox(height: 8),
             Container(
@@ -404,7 +315,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Submit Button
+            // Tombol simpan
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

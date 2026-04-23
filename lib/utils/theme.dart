@@ -55,7 +55,7 @@ class AppTheme {
     Color(0xFF34D399), // 5 - Tagihan       → Emerald
     Color(0xFFB17AF7), // 6 - Pendidikan    → Lavender
     Color(0xFFFB923C), // 7 - Bensin        → Orange
-    Color(0xFF4DB8E8), // 8 - Game          → Cerulean
+    Color(0xFF4DB8E8), // 8 - Game          → Cerulean Fang
     Color(0xFFF472B6), // 9 - Lainnya       → Soft pink
   ];
 

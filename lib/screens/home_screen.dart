@@ -42,11 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 60,
         height: 60,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppTheme.primary, AppTheme.accent],
-          ),
+          color: AppTheme.primary,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(

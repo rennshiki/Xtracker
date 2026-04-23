@@ -143,11 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppTheme.cardGradientStart, AppTheme.cardGradientEnd],
-                    ),
+                    color: AppTheme.cardGradientStart,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: AppTheme.cardBorder),
                   ),
@@ -274,11 +270,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   width: 36,
                                   height: 36,
                                   decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [color, color.withOpacity(0.7)],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
+                                    color: color,
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
@@ -434,11 +426,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final color = AppTheme.getCategoryColor(cat, allCategories);
                 return PieChartSectionData(
                   value: val,
-                  gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.7)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
+                  color: color,
                   radius: isTouched ? 70 : 60,
                   title: '',
                   borderSide: BorderSide(
