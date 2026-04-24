@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => ExpenseProvider()..loadData(),
       child: MaterialApp(
-        title: 'Expense Tracker',
+        title: 'XTracker',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         scrollBehavior: const ScrollBehavior().copyWith(overscroll: false),

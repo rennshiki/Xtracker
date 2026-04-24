@@ -3,60 +3,52 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
 
-  // Background & Surface
-  // Sebelum: #121212 (pure black)
-  static const bg          = Color(0xFF0D0F14);
-  // Sebelum: #1E1E1E
-  static const surface     = Color(0xFF161A23);
-  // Sebelum: #2A2A2A
-  static const surfaceHigh = Color(0xFF1E2330);
-  // Sebelum: #333333
-  static const border      = Color(0xFF252B3B);
+  // Background & Surface (Obsidian Deep)
+  static const bg           = Color(0xFF080A0F);
+  static const surface      = Color(0xFF0E1118);
+  static const surfaceHigh  = Color(0xFF141820);
+  static const surfaceGlass = Color(0xFF1A2030);
+  static const border       = Color(0xFF1F2535);
+  static const borderGlow   = Color(0xFF2E3A52);
 
-  // Primary
-  // Sebelum: #00C853 (hijau neon)
-  static const primary      = Color(0xFF7C6FF7);
-  // Sebelum: #69F0AE (hijau muda)
-  static const primaryLight = Color(0xFFAFA6FC);
+  // Primary: Gold / Amber (luxury accent)
+  static const primary      = Color(0xFFE8B84B);
+  static const primaryLight = Color(0xFFF5D07A);
+  static const primaryDim   = Color(0xFF3D3010);
 
-  // Accent
-  // Sebelum: #2979FF (biru terang)
-  static const accent = Color(0xFF38C7B0);
+  // Accent: Emerald Teal
+  static const accent    = Color(0xFF00D4AA);
+  static const accentDim = Color(0xFF0D2E28);
 
   // Text
-  // Sebelum: #FFFFFF (pure white)
   static const textPrimary   = Color(0xFFF0F2F8);
-  // Sebelum: #B0B0B0
-  static const textSecondary = Color(0xFF8B93A8);
-  // Sebelum: #808080
-  static const textMuted     = Color(0xFF4E5568);
+  static const textSecondary = Color(0xFF7D8BA8);
+  static const textMuted     = Color(0xFF3D4560);
 
   // Status
-  // Sebelum: #00E676 (neon green)
-  static const success = Color(0xFF34D399);
-  // Sebelum: #FF5252 (merah terang)
-  static const danger  = Color(0xFFF87171);
+  static const success = Color(0xFF22D3A5);
+  static const danger  = Color(0xFFFF5F6D);
+  static const warning = Color(0xFFFFB341);
 
-  // Gradient kartu total pengeluaran
-  // Sebelum: hardcoded di dashboard_screen.dart sebagai Color(0xFF2D1F6E) & Color(0xFF1A1230)
-  static const cardGradientStart = Color(0xFF1E1852);
-  static const cardGradientEnd   = Color(0xFF0F0D2E);
-  // Sebelum: hardcoded Color(0xFF3D2A8A)
-  static const cardBorder        = Color(0xFF342D7A);
+  // Total Card Gradient
+  static const cardGradientStart = Color(0xFF141022);
+  static const cardGradientEnd   = Color(0xFF080A0F);
+  static const cardGradientMid   = Color(0xFF0F1428);
+  static const cardBorder        = Color(0xFF2A2048);
+  static const cardGoldBorder    = Color(0xFF5A4210);
 
-  // Warna chart per kategori
-  // Sebelum: semua warna neon (hijau, biru terang, kuning keras, dll)
+  // Category chart colors
   static const List<Color> chartColors = [
-    Color(0xFF7C6FF7), // 0 - Makan        → Violet
-    Color(0xFF38C7B0), // 1 - Transport     → Teal
-    Color(0xFFF5A623), // 2 - Belanja       → Amber
-    Color(0xFFF87171), // 3 - Hiburan       → Coral
-    Color(0xFF60AFFE), // 4 - Kesehatan     → Sky blue
-    Color(0xFF34D399), // 5 - Tagihan       → Emerald
-    Color(0xFFB17AF7), // 6 - Pendidikan    → Lavender
-    Color(0xFFFB923C), // 7 - Bensin        → Orange
-    Color(0xFF4DB8E8), // 8 - Game          → Cerulean Fang
-    Color(0xFFF472B6), // 9 - Lainnya       → Soft pink
+    Color(0xFFE8B84B), // 0 - Makan
+    Color(0xFF00D4AA), // 1 - Transport
+    Color(0xFFFF7B54), // 2 - Belanja
+    Color(0xFFAD7BFF), // 3 - Hiburan
+    Color(0xFF54AEFF), // 4 - Kesehatan
+    Color(0xFF3DE0A4), // 5 - Tagihan
+    Color(0xFFF06292), // 6 - Pendidikan
+    Color(0xFFFFB341), // 7 - Bensin
+    Color(0xFF64B5F6), // 8 - Game
+    Color(0xFFFF8A65), // 9 - Lainnya
   ];
 
   static Color getCategoryColor(String category, List<String> allCategories) {
@@ -73,7 +65,6 @@ class AppTheme {
     brightness: Brightness.dark,
     scaffoldBackgroundColor: bg,
     primaryColor: primary,
-
     colorScheme: const ColorScheme.dark(
       primary: primary,
       secondary: accent,
@@ -81,65 +72,57 @@ class AppTheme {
       background: bg,
       error: danger,
     ),
-
-    textTheme: GoogleFonts.dmSansTextTheme(
+    textTheme: GoogleFonts.soraTextTheme(
       ThemeData.dark().textTheme,
     ).apply(
       bodyColor: textPrimary,
       displayColor: textPrimary,
     ),
-
     useMaterial3: true,
-
     appBarTheme: const AppBarTheme(
-      centerTitle: true,
+      centerTitle: false,
       elevation: 0,
       backgroundColor: surface,
       foregroundColor: textPrimary,
       surfaceTintColor: Colors.transparent,
     ),
-
     cardTheme: CardThemeData(
-      color: surface,
+      color: surfaceHigh,
       elevation: 0,
       shadowColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         side: const BorderSide(color: border, width: 1),
       ),
     ),
-
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: primary,
-      foregroundColor: Colors.white,
-      elevation: 8,
+      foregroundColor: Colors.black,
+      elevation: 12,
     ),
-
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: surfaceHigh,
+      fillColor: surfaceGlass,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: border),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: border),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: primary, width: 1.5),
       ),
       labelStyle: const TextStyle(color: textSecondary),
       hintStyle: const TextStyle(color: textMuted),
     ),
-
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: surface,
       selectedItemColor: primary,
       unselectedItemColor: textMuted,
     ),
-
     dividerTheme: const DividerThemeData(
       color: border,
       thickness: 1,

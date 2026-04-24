@@ -17,13 +17,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   DateTime _selectedMonth = DateTime.now();
   String? _filterCategory;
 
-  void _prevMonth() {
-    setState(() => _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1));
-  }
+  void _prevMonth() =>
+      setState(() => _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1));
 
   void _nextMonth() {
     final now = DateTime.now();
-    if (_selectedMonth.year < now.year || (_selectedMonth.year == now.year && _selectedMonth.month < now.month)) {
+    if (_selectedMonth.year < now.year ||
+        (_selectedMonth.year == now.year && _selectedMonth.month < now.month)) {
       setState(() => _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1));
     }
   }
@@ -39,7 +39,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       monthExpenses = monthExpenses.where((e) => e.category == _filterCategory).toList();
     }
 
-    // Group by date
     final Map<String, List<Expense>> grouped = {};
     for (final e in monthExpenses) {
       final key = CurrencyFormatter.formatDayShort(e.date);
@@ -50,50 +49,87 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
-      appBar: AppBar(
-        backgroundColor: AppTheme.surface,
-        surfaceTintColor: Colors.transparent,
-        title: const Text('Riwayat', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppTheme.border),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight + 1),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            border: Border(
+              bottom: BorderSide(color: AppTheme.border.withOpacity(0.6), width: 1),
+            ),
+          ),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Riwayat',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      Text(
+                        '${monthExpenses.length} transaksi',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppTheme.textMuted,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  // Month nav compact
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceHigh,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.border),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _smallNavBtn(Icons.chevron_left_rounded, _prevMonth),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            CurrencyFormatter.formatMonthYear(_selectedMonth),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                        ),
+                        _smallNavBtn(Icons.chevron_right_rounded, _nextMonth,
+                          disabled: _selectedMonth.month == DateTime.now().month &&
+                              _selectedMonth.year == DateTime.now().year),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
       body: Column(
         children: [
-          // Month selector
-          Container(
-            color: AppTheme.surface,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: _prevMonth,
-                  child: const Icon(Icons.chevron_left_rounded, color: AppTheme.textSecondary),
-                ),
-                Text(
-                  CurrencyFormatter.formatMonthYear(_selectedMonth),
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-                ),
-                GestureDetector(
-                  onTap: _nextMonth,
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    color: (_selectedMonth.month == DateTime.now().month && _selectedMonth.year == DateTime.now().year)
-                        ? AppTheme.textMuted
-                        : AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
           // Category filter chips
           if (categories.isNotEmpty)
             Container(
               color: AppTheme.surface,
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -105,28 +141,61 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
 
-          Container(height: 1, color: AppTheme.border),
+          if (categories.isNotEmpty)
+            Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    AppTheme.border,
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
 
-          // Expense list
+          // List
           Expanded(
             child: monthExpenses.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('📭', style: TextStyle(fontSize: 56)),
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceHigh,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppTheme.border),
+                          ),
+                          child: const Center(
+                            child: Text('📭', style: TextStyle(fontSize: 32)),
+                          ),
+                        ),
                         const SizedBox(height: 16),
-                        const Text('Tidak ada pengeluaran', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
+                        const Text(
+                          'Tidak ada transaksi',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         Text(
-                          _filterCategory != null ? 'Untuk kategori $_filterCategory' : 'Bulan ini belum ada transaksi',
+                          _filterCategory != null
+                              ? 'Untuk kategori $_filterCategory'
+                              : 'Bulan ini belum ada data',
                           style: const TextStyle(fontSize: 13, color: AppTheme.textMuted),
                         ),
                       ],
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 100),
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 100, top: 8),
                     itemCount: grouped.length,
                     itemBuilder: (ctx, i) {
                       final dateLabel = grouped.keys.elementAt(i);
@@ -137,136 +206,42 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         children: [
                           // Date header
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  dateLabel,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.textSecondary,
-                                    letterSpacing: 0.5,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.surfaceHigh,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: AppTheme.border),
+                                  ),
+                                  child: Text(
+                                    dateLabel,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.textSecondary,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
                                 ),
                                 Text(
                                   CurrencyFormatter.format(dayTotal),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.primary.withOpacity(0.8),
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.primary,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          // Expense items
+                          // Items
                           ...dayExpenses.map((expense) {
-                            // Warna tetap berdasarkan posisi kategori di allCategories
                             final color = AppTheme.getCategoryColor(expense.category, allCategories);
-
-                            return Slidable(
-                              key: Key(expense.id),
-                              endActionPane: ActionPane(
-                                motion: const DrawerMotion(),
-                                extentRatio: 0.25,
-                                children: [
-                                  SlidableAction(
-                                    onPressed: (_) => _confirmDelete(context, provider, expense.id),
-                                    backgroundColor: AppTheme.danger,
-                                    foregroundColor: Colors.white,
-                                    icon: Icons.delete_outline_rounded,
-                                    label: 'Hapus',
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ],
-                              ),
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                                padding: const EdgeInsets.all(14),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.surface,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: AppTheme.border),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-
-                                    // ICON CATEGORY
-                                    Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: color.withOpacity(0.15),
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: Center(
-                                        child: Image.asset(
-                                          AppIcons.getIcon(expense.category),
-                                          width: 24,
-                                          height: 24,
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(width: 14),
-
-                                    // CATEGORY + NOTE
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-
-                                          Text(
-                                            expense.category,
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppTheme.textPrimary,
-                                            ),
-                                          ),
-
-                                          const SizedBox(height: 4),
-
-                                          if (expense.note.isNotEmpty)
-                                            Text(
-                                              expense.note,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: AppTheme.textMuted,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-
-                                        ],
-                                      ),
-                                    ),
-
-                                    const SizedBox(width: 8),
-
-                                    // AMOUNT
-                                    Text(
-                                      CurrencyFormatter.format(expense.amount),
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.danger,
-                                      ),
-                                    ),
-
-                                  ],
-                                ),
-                              ),
-                            );
+                            return _expenseItem(expense, color, provider, context);
                           }),
                         ],
                       );
@@ -278,39 +253,148 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  Widget _expenseItem(Expense expense, Color color, ExpenseProvider provider, BuildContext context) {
+    return Slidable(
+      key: Key(expense.id),
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.25,
+        children: [
+          SlidableAction(
+            onPressed: (_) => _confirmDelete(context, provider, expense.id),
+            backgroundColor: AppTheme.danger,
+            foregroundColor: Colors.white,
+            icon: Icons.delete_outline_rounded,
+            label: 'Hapus',
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ],
+      ),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: Row(
+          children: [
+            // Left accent bar
+            Container(
+              width: 3,
+              height: 44,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.4),
+                    blurRadius: 6,
+                    offset: const Offset(0, 0),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withOpacity(0.2)),
+              ),
+              child: Center(
+                child: Image.asset(
+                  AppIcons.getIcon(expense.category),
+                  width: 22,
+                  height: 22,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    expense.category,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  if (expense.note.isNotEmpty)
+                    Text(
+                      expense.note,
+                      style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              CurrencyFormatter.format(expense.amount),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.danger,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _smallNavBtn(IconData icon, VoidCallback onTap, {bool disabled = false}) {
+    return GestureDetector(
+      onTap: disabled ? null : onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Icon(
+          icon,
+          size: 18,
+          color: disabled ? AppTheme.textMuted.withOpacity(0.3) : AppTheme.textSecondary,
+        ),
+      ),
+    );
+  }
+
   Widget _filterChip(String label, String? cat, List<String> allCategories) {
     final selected = _filterCategory == cat;
-    final color = cat != null
-        ? AppTheme.getCategoryColor(cat, allCategories)
-        : AppTheme.primary;
+    final color = cat != null ? AppTheme.getCategoryColor(cat, allCategories) : AppTheme.primary;
 
     return GestureDetector(
       onTap: () => setState(() => _filterCategory = cat),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.2) : AppTheme.surfaceHigh,
+          color: selected ? color.withOpacity(0.15) : AppTheme.surfaceHigh,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? color : AppTheme.border),
+          border: Border.all(
+            color: selected ? color.withOpacity(0.5) : AppTheme.border,
+            width: selected ? 1.5 : 1,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (cat != null) ...[
-              Image.asset(
-                AppIcons.getIcon(cat),
-                width: 14,
-                height: 14,
-              ),
-              const SizedBox(width: 4),
+              Image.asset(AppIcons.getIcon(cat), width: 14, height: 14),
+              const SizedBox(width: 5),
             ],
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: FontWeight.w600,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color: selected ? color : AppTheme.textSecondary,
               ),
             ),
@@ -323,24 +407,100 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _confirmDelete(BuildContext context, ExpenseProvider provider, String id) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Hapus Pengeluaran?', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16)),
-        content: const Text('Data ini tidak bisa dikembalikan.', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: AppTheme.textSecondary)),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceHigh,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 30,
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              provider.deleteExpense(id);
-              Navigator.pop(ctx);
-            },
-            child: const Text('Hapus', style: TextStyle(color: AppTheme.danger, fontWeight: FontWeight.w700)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: AppTheme.danger.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.danger.withOpacity(0.3)),
+                ),
+                child: const Icon(Icons.delete_outline_rounded, color: AppTheme.danger, size: 26),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Hapus Pengeluaran?',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Data ini tidak bisa dikembalikan.',
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(ctx),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceGlass,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppTheme.border),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Batal',
+                          style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        provider.deleteExpense(id);
+                        Navigator.pop(ctx);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.danger.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppTheme.danger.withOpacity(0.4)),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Hapus',
+                          style: TextStyle(
+                            color: AppTheme.danger,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

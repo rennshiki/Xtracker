@@ -12,10 +12,26 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProviderStateMixin {
   DateTime _selectedMonth = DateTime.now();
   int _touchedIndex = -1;
   bool _showPie = true;
+  late AnimationController _fadeCtrl;
+  late Animation<double> _fadeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+    _fadeCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    super.dispose();
+  }
 
   void _prevMonth() {
     setState(() {
@@ -44,317 +60,529 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
-      body: CustomScrollView(
-        slivers: [
-          // App Bar
-          SliverAppBar(
-            expandedHeight: 0,
-            floating: true,
-            backgroundColor: AppTheme.surface,
-            surfaceTintColor: Colors.transparent,
-            title: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(9),
-                  child: Image.asset(
-                    'assets/icons/logo.png',
-                    width: 32,
-                    height: 32,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('XTracker',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-                    Text('Pencatat Pengeluaran Anda',
-                        style: TextStyle(fontSize: 10, color: AppTheme.textMuted, letterSpacing: 0.5)),
-                  ],
-                ),
-              ],
-            ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: Container(height: 1, color: AppTheme.border),
-            ),
-          ),
-
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-
-                // Month Selector
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.border),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: _prevMonth,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surfaceHigh,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.chevron_left_rounded, color: AppTheme.textSecondary, size: 20),
-                        ),
+      body: FadeTransition(
+        opacity: _fadeAnim,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // ── App Bar ─────────────────────────────────────────────────────
+            SliverAppBar(
+              expandedHeight: 0,
+              floating: true,
+              backgroundColor: AppTheme.surface,
+              surfaceTintColor: Colors.transparent,
+              title: Row(
+                children: [
+                  // Logo with gold ring
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.primary.withOpacity(0.5), width: 1.5),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        'assets/icons/logo.png',
+                        fit: BoxFit.cover,
                       ),
-                      Text(
-                        CurrencyFormatter.formatMonthYear(_selectedMonth),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: _nextMonth,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surfaceHigh,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.chevron_right_rounded,
-                            color: _selectedMonth.month == DateTime.now().month &&
-                                    _selectedMonth.year == DateTime.now().year
-                                ? AppTheme.textMuted
-                                : AppTheme.textSecondary,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                // Total Card
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppTheme.cardGradientStart,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppTheme.cardBorder),
-                  ),
-                  child: Column(
+                  const SizedBox(width: 12),
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          const Text('💸', style: TextStyle(fontSize: 20)),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Total Pengeluaran Bulan Ini',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.primary.withOpacity(0.8),
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        CurrencyFormatter.format(total),
-                        style: const TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w800,
-                          color: Color.fromARGB(255, 255, 255, 255),
-                          letterSpacing: -1,
+                      const Text(
+                        'XTracker',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: 0.3,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              '${categoryTotals.length} kategori',
-                              style: const TextStyle(fontSize: 11, color: AppTheme.primaryLight, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: AppTheme.accent.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              '${provider.getExpensesForMonth(_selectedMonth.year, _selectedMonth.month).length} transaksi',
-                              style: TextStyle(fontSize: 11, color: AppTheme.accent, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Pencatat Pengeluaran',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppTheme.textMuted,
+                          letterSpacing: 0.8,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                if (categoryTotals.isNotEmpty) ...[
-                  // Chart Section
+                  const Spacer(),
+                  // Gold dot badge
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    width: 8,
+                    height: 8,
                     decoration: BoxDecoration(
-                      color: AppTheme.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppTheme.border),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Kategori',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: AppTheme.surfaceHigh,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  _chartToggle(Icons.donut_large_rounded, true),
-                                  _chartToggle(Icons.bar_chart_rounded, false),
-                                ],
-                              ),
-                            ),
-                          ],
+                      color: AppTheme.primary,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primary.withOpacity(0.6),
+                          blurRadius: 6,
+                          spreadRadius: 1,
                         ),
-                        const SizedBox(height: 20),
-
-                        if (_showPie)
-                          _buildPieChart(categories, values, total, allCategories)
-                        else
-                          _buildBarChart(categories, values, allCategories),
-
-                        const SizedBox(height: 20),
-
-                        // Legend
-                        ...categories.asMap().entries.map((entry) {
-                          final i = entry.key;
-                          final cat = entry.value;
-                          final val = values[i];
-                          final pct = total > 0 ? (val / total * 100).toStringAsFixed(1) : '0';
-                          // Warna tetap berdasarkan posisi kategori di allCategories
-                          final color = AppTheme.getCategoryColor(cat, allCategories);
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: color.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: color.withOpacity(0.2), width: 1),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 36,
-                                  height: 36,
-                                  decoration: BoxDecoration(
-                                    color: color,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: color.withOpacity(0.3),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: Image.asset(
-                                      AppIcons.getIcon(cat),
-                                      width: 20,
-                                      height: 20,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        cat,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppTheme.textPrimary,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        CurrencyFormatter.format(val),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: AppTheme.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: color.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    '$pct%',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: color,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
                       ],
                     ),
                   ),
-                ] else ...[
+                  const SizedBox(width: 16),
+                ],
+              ),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(1),
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        AppTheme.border,
+                        AppTheme.borderGlow.withOpacity(0.3),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+
+                  // ── Month Selector ──────────────────────────────────────
                   Container(
-                    padding: const EdgeInsets.all(40),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppTheme.surface,
-                      borderRadius: BorderRadius.circular(20),
+                      color: AppTheme.surfaceHigh,
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppTheme.border),
                     ),
-                    child: Column(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('📭', style: TextStyle(fontSize: 48)),
-                        const SizedBox(height: 12),
-                        const Text('Belum ada pengeluaran', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-                        const SizedBox(height: 4),
-                        Text('Tap tombol + untuk mulai mencatat', style: TextStyle(fontSize: 13, color: AppTheme.textMuted)),
+                        _monthNavBtn(Icons.chevron_left_rounded, _prevMonth),
+                        Text(
+                          CurrencyFormatter.formatMonthYear(_selectedMonth),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        _monthNavBtn(Icons.chevron_right_rounded, _nextMonth,
+                          disabled: _selectedMonth.month == DateTime.now().month &&
+                              _selectedMonth.year == DateTime.now().year),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Total Card (Hero) ────────────────────────────────────
+                  _buildTotalCard(total, categoryTotals, provider),
+                  const SizedBox(height: 16),
+
+                  // ── Chart or Empty ───────────────────────────────────────
+                  if (categoryTotals.isNotEmpty) ...[
+                    _buildChartSection(categories, values, total, allCategories),
+                  ] else ...[
+                    _buildEmptyState(),
+                  ],
+                ]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _monthNavBtn(IconData icon, VoidCallback onTap, {bool disabled = false}) {
+    return GestureDetector(
+      onTap: disabled ? null : onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: disabled ? Colors.transparent : AppTheme.surfaceGlass,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: disabled ? Colors.transparent : AppTheme.borderGlow.withOpacity(0.5),
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: disabled ? AppTheme.textMuted.withOpacity(0.3) : AppTheme.textSecondary,
+          size: 20,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTotalCard(double total, Map categoryTotals, dynamic provider) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF141022),
+            Color(0xFF0C1020),
+            Color(0xFF080A0F),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppTheme.primary.withOpacity(0.25),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.08),
+            blurRadius: 30,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Background glow orb
+          Positioned(
+            top: -20,
+            right: -20,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppTheme.primary.withOpacity(0.08),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primary.withOpacity(0.8),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'TOTAL PENGELUARAN',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ],
-              ]),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                CurrencyFormatter.format(total),
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -1,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                CurrencyFormatter.formatMonthYear(_selectedMonth),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textMuted,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Divider line
+              Container(
+                height: 1,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primary.withOpacity(0.3),
+                      AppTheme.border.withOpacity(0.2),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  _statBadge(
+                    '${categoryTotals.length}',
+                    'Kategori',
+                    AppTheme.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  _statBadge(
+                    '${provider.getExpensesForMonth(_selectedMonth.year, _selectedMonth.month).length}',
+                    'Transaksi',
+                    AppTheme.accent,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statBadge(String value, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: color,
             ),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppTheme.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChartSection(List<String> categories, List<double> values, double total, List<String> allCategories) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Distribusi',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    'Per kategori',
+                    style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceHigh,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: Row(
+                  children: [
+                    _chartToggle(Icons.donut_large_rounded, true),
+                    _chartToggle(Icons.bar_chart_rounded, false),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          if (_showPie)
+            _buildPieChart(categories, values, total, allCategories)
+          else
+            _buildBarChart(categories, values, allCategories),
+
+          const SizedBox(height: 20),
+
+          // Category legend
+          ...categories.asMap().entries.map((entry) {
+            final i = entry.key;
+            final cat = entry.value;
+            final val = values[i];
+            final pct = total > 0 ? (val / total * 100).toStringAsFixed(1) : '0';
+            final color = AppTheme.getCategoryColor(cat, allCategories);
+            return _categoryLegendItem(cat, val, pct, color);
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _categoryLegendItem(String cat, double val, String pct, Color color) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceHigh,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.15)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: color.withOpacity(0.25)),
+            ),
+            child: Center(
+              child: Image.asset(
+                AppIcons.getIcon(cat),
+                width: 20,
+                height: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  cat,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  CurrencyFormatter.format(val),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: color.withOpacity(0.2)),
+            ),
+            child: Text(
+              '$pct%',
+              style: TextStyle(
+                fontSize: 12,
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.08),
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+            ),
+            child: const Center(
+              child: Text('💸', style: TextStyle(fontSize: 32)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Belum ada pengeluaran',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Tap tombol + untuk mulai mencatat',
+            style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -366,12 +594,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return GestureDetector(
       onTap: () => setState(() => _showPie = isPie),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: active ? AppTheme.primary.withOpacity(0.25) : Colors.transparent,
-          borderRadius: BorderRadius.circular(7),
-          border: active ? Border.all(color: AppTheme.primary.withOpacity(0.5)) : null,
+          color: active ? AppTheme.primary.withOpacity(0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: active ? Border.all(color: AppTheme.primary.withOpacity(0.4)) : null,
         ),
         child: Icon(
           icon,
@@ -381,23 +609,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+
   Widget _buildPieChart(List<String> cats, List<double> vals, double total, List<String> allCategories) {
-    return Container(
+    return SizedBox(
       height: 240,
-      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // Glow behind pie
           Container(
-            width: 180,
-            height: 180,
+            width: 200,
+            height: 200,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.primary.withOpacity(0.15),
-                  blurRadius: 30,
-                  spreadRadius: 5,
+                  color: AppTheme.primary.withOpacity(0.06),
+                  blurRadius: 50,
+                  spreadRadius: 10,
                 ),
               ],
             ),
@@ -405,7 +634,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           PieChart(
             PieChartData(
               sectionsSpace: 2,
-              centerSpaceRadius: 60,
+              centerSpaceRadius: 62,
               pieTouchData: PieTouchData(
                 touchCallback: (event, response) {
                   setState(() {
@@ -422,15 +651,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final cat = entry.value;
                 final val = vals[i];
                 final isTouched = _touchedIndex == i;
-                // Warna tetap berdasarkan posisi di allCategories
                 final color = AppTheme.getCategoryColor(cat, allCategories);
                 return PieChartSectionData(
                   value: val,
                   color: color,
-                  radius: isTouched ? 70 : 60,
+                  radius: isTouched ? 72 : 62,
                   title: '',
                   borderSide: BorderSide(
-                    color: isTouched ? Colors.white.withOpacity(0.3) : Colors.transparent,
+                    color: isTouched ? Colors.white.withOpacity(0.4) : Colors.transparent,
                     width: 2,
                   ),
                 );
@@ -445,23 +673,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
               decoration: BoxDecoration(
                 color: AppTheme.surfaceHigh,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.border, width: 2),
+                border: Border.all(
+                  color: AppTheme.getCategoryColor(cats[_touchedIndex], allCategories).withOpacity(0.4),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.getCategoryColor(cats[_touchedIndex], allCategories).withOpacity(0.2),
+                    blurRadius: 16,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    AppIcons.getIcon(cats[_touchedIndex]),
-                    width: 26,
-                    height: 26,
-                  ),
+                  Image.asset(AppIcons.getIcon(cats[_touchedIndex]), width: 26, height: 26),
                   const SizedBox(height: 4),
                   Text(
                     '${(vals[_touchedIndex] / total * 100).toStringAsFixed(1)}%',
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
                       color: AppTheme.getCategoryColor(cats[_touchedIndex], allCategories),
                     ),
                   ),
@@ -479,28 +712,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/icons/category.png',
-                    width: 28,
-                    height: 28,
-                  ),
+                  Image.asset('assets/icons/category.png', width: 26, height: 26),
                   const SizedBox(height: 2),
                   Text(
                     '${cats.length}',
                     style: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       color: AppTheme.textPrimary,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'kategori',
-                    style: const TextStyle(
-                      fontSize: 9,
-                      color: AppTheme.textMuted,
-                    ),
+                    style: TextStyle(fontSize: 9, color: AppTheme.textMuted),
                   ),
                 ],
               ),
@@ -514,180 +739,162 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final maxVal = vals.isEmpty ? 100.0 : vals.reduce((a, b) => a > b ? a : b);
     final barWidth = cats.length > 6 ? 16.0 : cats.length > 4 ? 22.0 : 30.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: 240,
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.spaceEvenly,
-              maxY: maxVal * 1.3,
-              barTouchData: BarTouchData(
-                enabled: true,
-                handleBuiltInTouches: true,
-                touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (_) => AppTheme.surfaceHigh,
-                  tooltipBorder: const BorderSide(color: AppTheme.border, width: 1),
-                  tooltipRoundedRadius: 10,
-                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  tooltipMargin: 6,
-                  maxContentWidth: 110,
-                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                    final color = AppTheme.getCategoryColor(cats[groupIndex], allCategories);
-                    return BarTooltipItem(
-                      '',
-                      const TextStyle(),
-                      children: [
-                        TextSpan(
-                          text: '${cats[groupIndex]}\n',
-                          style: TextStyle(
-                            color: color,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        TextSpan(
-                          text: CurrencyFormatter.formatCompact(vals[groupIndex]),
-                          style: const TextStyle(
-                            color: AppTheme.textPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-              titlesData: FlTitlesData(
-                // Nilai di atas bar
-                topTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 24,
-                    getTitlesWidget: (value, meta) {
-                      final i = value.toInt();
-                      if (i < 0 || i >= vals.length) return const SizedBox();
-                      final color = AppTheme.getCategoryColor(cats[i], allCategories);
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text(
-                          CurrencyFormatter.formatCompact(vals[i]),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: color,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                // Icon kategori di bawah bar
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 48,
-                    getTitlesWidget: (value, meta) {
-                      final i = value.toInt();
-                      if (i < 0 || i >= cats.length) return const SizedBox();
-                      final color = AppTheme.getCategoryColor(cats[i], allCategories);
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: color.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: color.withOpacity(0.35),
-                              width: 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: Image.asset(
-                              AppIcons.getIcon(cats[i]),
-                              width: 20,
-                              height: 20,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 42,
-                    interval: maxVal * 0.5,
-                    getTitlesWidget: (value, meta) {
-                      if (value == 0) return const SizedBox();
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: Text(
-                          CurrencyFormatter.formatCompact(value),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            color: AppTheme.textMuted,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              ),
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: false,
-                horizontalInterval: maxVal * 0.5,
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: AppTheme.border.withOpacity(0.3),
-                  strokeWidth: 1,
-                  dashArray: [4, 6],
-                ),
-              ),
-              borderData: FlBorderData(
-                show: true,
-                border: Border(
-                  bottom: BorderSide(color: AppTheme.border.withOpacity(0.4), width: 1),
-                  left: BorderSide(color: AppTheme.border.withOpacity(0.4), width: 1),
-                ),
-              ),
-              barGroups: cats.asMap().entries.map((entry) {
-                final i = entry.key;
-                final color = AppTheme.getCategoryColor(cats[i], allCategories);
-                return BarChartGroupData(
-                  x: i,
-                  barRods: [
-                    BarChartRodData(
-                      toY: vals[i],
-                      color: color,
-                      width: barWidth,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(6),
-                        bottom: Radius.zero,
+    return SizedBox(
+      height: 240,
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceEvenly,
+          maxY: maxVal * 1.3,
+          barTouchData: BarTouchData(
+            enabled: true,
+            handleBuiltInTouches: true,
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipColor: (_) => AppTheme.surfaceGlass,
+              tooltipBorder: const BorderSide(color: AppTheme.borderGlow, width: 1),
+              tooltipRoundedRadius: 10,
+              tooltipPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              tooltipMargin: 6,
+              maxContentWidth: 120,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                final color = AppTheme.getCategoryColor(cats[groupIndex], allCategories);
+                return BarTooltipItem(
+                  '',
+                  const TextStyle(),
+                  children: [
+                    TextSpan(
+                      text: '${cats[groupIndex]}\n',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                       ),
-                      backDrawRodData: BackgroundBarChartRodData(
-                        show: true,
-                        toY: maxVal * 1.3,
-                        color: color.withOpacity(0.06),
+                    ),
+                    TextSpan(
+                      text: CurrencyFormatter.formatCompact(vals[groupIndex]),
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
                 );
-              }).toList(),
+              },
             ),
-            swapAnimationDuration: const Duration(milliseconds: 400),
-            swapAnimationCurve: Curves.easeInOutCubic,
           ),
+          titlesData: FlTitlesData(
+            topTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 24,
+                getTitlesWidget: (value, meta) {
+                  final i = value.toInt();
+                  if (i < 0 || i >= vals.length) return const SizedBox();
+                  final color = AppTheme.getCategoryColor(cats[i], allCategories);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      CurrencyFormatter.formatCompact(vals[i]),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color),
+                    ),
+                  );
+                },
+              ),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 48,
+                getTitlesWidget: (value, meta) {
+                  final i = value.toInt();
+                  if (i < 0 || i >= cats.length) return const SizedBox();
+                  final color = AppTheme.getCategoryColor(cats[i], allCategories);
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: color.withOpacity(0.3)),
+                      ),
+                      child: Center(
+                        child: Image.asset(AppIcons.getIcon(cats[i]), width: 20, height: 20),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 42,
+                interval: maxVal * 0.5,
+                getTitlesWidget: (value, meta) {
+                  if (value == 0) return const SizedBox();
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Text(
+                      CurrencyFormatter.formatCompact(value),
+                      style: const TextStyle(fontSize: 9, color: AppTheme.textMuted, fontWeight: FontWeight.w500),
+                    ),
+                  );
+                },
+              ),
+            ),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: maxVal * 0.5,
+            getDrawingHorizontalLine: (value) => FlLine(
+              color: AppTheme.border.withOpacity(0.4),
+              strokeWidth: 1,
+              dashArray: [4, 6],
+            ),
+          ),
+          borderData: FlBorderData(
+            show: true,
+            border: Border(
+              bottom: BorderSide(color: AppTheme.border.withOpacity(0.5), width: 1),
+              left: BorderSide(color: AppTheme.border.withOpacity(0.5), width: 1),
+            ),
+          ),
+          barGroups: cats.asMap().entries.map((entry) {
+            final i = entry.key;
+            final color = AppTheme.getCategoryColor(cats[i], allCategories);
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: vals[i],
+                  gradient: LinearGradient(
+                    colors: [color, color.withOpacity(0.6)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  width: barWidth,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(6),
+                    bottom: Radius.zero,
+                  ),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: maxVal * 1.3,
+                    color: color.withOpacity(0.05),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
         ),
-      ],
+        swapAnimationDuration: const Duration(milliseconds: 400),
+        swapAnimationCurve: Curves.easeInOutCubic,
+      ),
     );
   }
 }
