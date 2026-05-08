@@ -28,6 +28,242 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  Future<void> _pickMonthYear() async {
+    int tempYear = _selectedMonth.year;
+    int tempMonth = _selectedMonth.month;
+    final now = DateTime.now();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setInner) {
+            final months = [
+              'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+            ];
+
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceHigh,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppTheme.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 40,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Pilih Bulan',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(ctx),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.surfaceGlass,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppTheme.border),
+                            ),
+                            child: const Icon(Icons.close_rounded,
+                                color: AppTheme.textMuted, size: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Year selector
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceGlass,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppTheme.border),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () => setInner(() => tempYear--),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceHigh,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: AppTheme.border),
+                              ),
+                              child: const Icon(Icons.chevron_left_rounded,
+                                  color: AppTheme.textSecondary, size: 20),
+                            ),
+                          ),
+                          Text(
+                            '$tempYear',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.textPrimary,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              if (tempYear < now.year) {
+                                setInner(() => tempYear++);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: tempYear >= now.year
+                                    ? Colors.transparent
+                                    : AppTheme.surfaceHigh,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: tempYear >= now.year
+                                      ? Colors.transparent
+                                      : AppTheme.border,
+                                ),
+                              ),
+                              child: Icon(Icons.chevron_right_rounded,
+                                  color: tempYear >= now.year
+                                      ? AppTheme.textMuted.withOpacity(0.3)
+                                      : AppTheme.textSecondary,
+                                  size: 20),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Month grid
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 12,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        childAspectRatio: 2.2,
+                      ),
+                      itemBuilder: (_, i) {
+                        final m = i + 1;
+                        final isDisabled =
+                            tempYear == now.year && m > now.month;
+                        final isSelected = tempYear == _selectedMonth.year &&
+                            m == _selectedMonth.month &&
+                            tempYear == tempYear;
+                        final isCurrentlySelected = m == tempMonth && tempYear == _selectedMonth.year;
+
+                        return GestureDetector(
+                          onTap: isDisabled
+                              ? null
+                              : () => setInner(() => tempMonth = m),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            decoration: BoxDecoration(
+                              color: tempMonth == m
+                                  ? AppTheme.primary.withOpacity(0.15)
+                                  : isDisabled
+                                      ? Colors.transparent
+                                      : AppTheme.surfaceGlass,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: tempMonth == m
+                                    ? AppTheme.primary.withOpacity(0.6)
+                                    : isDisabled
+                                        ? AppTheme.border.withOpacity(0.3)
+                                        : AppTheme.border,
+                                width: tempMonth == m ? 1.5 : 1,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              months[i],
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: tempMonth == m
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: tempMonth == m
+                                    ? AppTheme.primary
+                                    : isDisabled
+                                        ? AppTheme.textMuted.withOpacity(0.3)
+                                        : AppTheme.textSecondary,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Confirm button
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedMonth = DateTime(tempYear, tempMonth);
+                        });
+                        Navigator.pop(ctx);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppTheme.primaryLight, AppTheme.primary],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primary.withOpacity(0.3),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Pilih',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1000),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ExpenseProvider>();
@@ -46,92 +282,105 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
 
     final categories = categoryTotals.keys.toList();
+    final now = DateTime.now();
+    final isCurrentMonth = _selectedMonth.year == now.year && _selectedMonth.month == now.month;
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 1),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppTheme.surface,
-            border: Border(
-              bottom: BorderSide(color: AppTheme.border.withOpacity(0.6), width: 1),
-            ),
-          ),
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Riwayat',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                      Text(
-                        '${monthExpenses.length} transaksi',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppTheme.textMuted,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ],
+      appBar: AppBar(
+        backgroundColor: AppTheme.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 64,
+        titleSpacing: 20,
+        title: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Riwayat',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: -0.3,
                   ),
-                  const Spacer(),
-                  // Month nav compact
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceHigh,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.border),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _smallNavBtn(Icons.chevron_left_rounded, _prevMonth),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(
+                ),
+                Text(
+                  '${monthExpenses.length} transaksi',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textMuted,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            // Month/Year selector — tap middle to open picker
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceHigh,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _smallNavBtn(Icons.chevron_left_rounded, _prevMonth),
+                  GestureDetector(
+                    onTap: _pickMonthYear,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
                             CurrencyFormatter.formatMonthYear(_selectedMonth),
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: AppTheme.textPrimary,
+                              color: AppTheme.primary,
                             ),
                           ),
-                        ),
-                        _smallNavBtn(Icons.chevron_right_rounded, _nextMonth,
-                          disabled: _selectedMonth.month == DateTime.now().month &&
-                              _selectedMonth.year == DateTime.now().year),
-                      ],
+                          const SizedBox(width: 4),
+                          const Icon(Icons.expand_more_rounded,
+                              color: AppTheme.primary, size: 14),
+                        ],
+                      ),
                     ),
                   ),
+                  _smallNavBtn(Icons.chevron_right_rounded, _nextMonth,
+                      disabled: isCurrentMonth),
                 ],
               ),
             ),
-          ),
+            const SizedBox(width: 4),
+          ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: AppTheme.border.withOpacity(0.6)),
         ),
       ),
       body: Column(
         children: [
-          // Category filter chips
-          if (categories.isNotEmpty)
+          // Filter chips — full width
+          if (categories.isNotEmpty) ...[
             Container(
+              width: double.infinity,
               color: AppTheme.surface,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                 child: Row(
                   children: [
                     _filterChip('Semua', null, allCategories),
@@ -140,81 +389,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               ),
             ),
-
-            Expanded(
-              child: ListView.builder
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.only(
-                  bottom: 100 + MediaQuery.of(context).padding.bottom,
-                  top: 8,
-                ),
-                itemCount: grouped.length,
-                itemBuilder: (ctx, i) {
-                  final dateLabel = grouped.keys.elementAt(i);
-                  final dayExpenses = grouped[dateLabel]!;
-                  final dayTotal = dayExpenses.fold(0.0, (s, e) => s + e.amount);
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Date header
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppTheme.surfaceHigh,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppTheme.border),
-                              ),
-                              child: Text(
-                                dateLabel,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.textSecondary,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              CurrencyFormatter.format(dayTotal),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Items
-                      ...dayExpenses.map((expense) {
-                        final color = AppTheme.getCategoryColor(expense.category, allCategories);
-                        return _expenseItem(expense, color, provider, context);
-                      }),
-                    ],
-                  );
-                },
-              ),
-
-          if (categories.isNotEmpty)
             Container(
               height: 1,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.transparent,
-                    AppTheme.border,
-                    Colors.transparent,
-                  ],
+                  colors: [Colors.transparent, AppTheme.border, Colors.transparent],
                 ),
               ),
             ),
+          ],
 
-          // List
+          // List or empty state
           Expanded(
             child: monthExpenses.isEmpty
                 ? Center(
@@ -266,7 +451,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Date header
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                             child: Row(
@@ -300,7 +484,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               ],
                             ),
                           ),
-                          // Items
                           ...dayExpenses.map((expense) {
                             final color = AppTheme.getCategoryColor(expense.category, allCategories);
                             return _expenseItem(expense, color, provider, context);
@@ -342,20 +525,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         child: Row(
           children: [
-            // Left accent bar
             Container(
               width: 3,
               height: 44,
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: BorderRadius.circular(2),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.4),
-                    blurRadius: 6,
-                    offset: const Offset(0, 0),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 6)],
               ),
             ),
             const SizedBox(width: 12),
@@ -368,11 +544,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 border: Border.all(color: color.withOpacity(0.2)),
               ),
               child: Center(
-                child: Image.asset(
-                  AppIcons.getIcon(expense.category),
-                  width: 22,
-                  height: 22,
-                ),
+                child: Image.asset(AppIcons.getIcon(expense.category), width: 22, height: 22),
               ),
             ),
             const SizedBox(width: 12),
@@ -477,12 +649,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             color: AppTheme.surfaceHigh,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppTheme.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 30,
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 30)],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -500,11 +667,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               const SizedBox(height: 16),
               const Text(
                 'Hapus Pengeluaran?',
-                style: TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 6),
               const Text(
@@ -550,10 +713,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         alignment: Alignment.center,
                         child: const Text(
                           'Hapus',
-                          style: TextStyle(
-                            color: AppTheme.danger,
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: TextStyle(color: AppTheme.danger, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),

@@ -49,6 +49,235 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     }
   }
 
+  Future<void> _pickMonthYear() async {
+    int tempYear = _selectedMonth.year;
+    int tempMonth = _selectedMonth.month;
+    final now = DateTime.now();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setInner) {
+            final months = [
+              'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+            ];
+
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceHigh,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppTheme.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 40,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Pilih Bulan',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(ctx),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.surfaceGlass,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppTheme.border),
+                            ),
+                            child: const Icon(Icons.close_rounded,
+                                color: AppTheme.textMuted, size: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Year selector
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceGlass,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppTheme.border),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () => setInner(() => tempYear--),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceHigh,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: AppTheme.border),
+                              ),
+                              child: const Icon(Icons.chevron_left_rounded,
+                                  color: AppTheme.textSecondary, size: 20),
+                            ),
+                          ),
+                          Text(
+                            '$tempYear',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.textPrimary,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              if (tempYear < now.year) {
+                                setInner(() => tempYear++);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: tempYear >= now.year
+                                    ? Colors.transparent
+                                    : AppTheme.surfaceHigh,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: tempYear >= now.year
+                                      ? Colors.transparent
+                                      : AppTheme.border,
+                                ),
+                              ),
+                              child: Icon(Icons.chevron_right_rounded,
+                                  color: tempYear >= now.year
+                                      ? AppTheme.textMuted.withOpacity(0.3)
+                                      : AppTheme.textSecondary,
+                                  size: 20),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Month grid
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 12,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        childAspectRatio: 2.2,
+                      ),
+                      itemBuilder: (_, i) {
+                        final m = i + 1;
+                        final isDisabled = tempYear == now.year && m > now.month;
+
+                        return GestureDetector(
+                          onTap: isDisabled ? null : () => setInner(() => tempMonth = m),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            decoration: BoxDecoration(
+                              color: tempMonth == m
+                                  ? AppTheme.primary.withOpacity(0.15)
+                                  : isDisabled
+                                      ? Colors.transparent
+                                      : AppTheme.surfaceGlass,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: tempMonth == m
+                                    ? AppTheme.primary.withOpacity(0.6)
+                                    : isDisabled
+                                        ? AppTheme.border.withOpacity(0.3)
+                                        : AppTheme.border,
+                                width: tempMonth == m ? 1.5 : 1,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              months[i],
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: tempMonth == m
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: tempMonth == m
+                                    ? AppTheme.primary
+                                    : isDisabled
+                                        ? AppTheme.textMuted.withOpacity(0.3)
+                                        : AppTheme.textSecondary,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Confirm button
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedMonth = DateTime(tempYear, tempMonth);
+                        });
+                        Navigator.pop(ctx);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppTheme.primaryLight, AppTheme.primary],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primary.withOpacity(0.3),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Pilih',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1000),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ExpenseProvider>();
@@ -57,6 +286,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     final categoryTotals = provider.getCategoryTotalsForMonth(_selectedMonth.year, _selectedMonth.month);
     final categories = categoryTotals.keys.toList();
     final values = categoryTotals.values.toList();
+    final now = DateTime.now();
+    final isCurrentMonth = _selectedMonth.year == now.year && _selectedMonth.month == now.month;
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
@@ -167,18 +398,39 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _monthNavBtn(Icons.chevron_left_rounded, _prevMonth),
-                        Text(
-                          CurrencyFormatter.formatMonthYear(_selectedMonth),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textPrimary,
-                            letterSpacing: 0.5,
+
+                        // Tappable month/year label
+                        GestureDetector(
+                          onTap: _pickMonthYear,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  CurrencyFormatter.formatMonthYear(_selectedMonth),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.primary,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Icon(Icons.expand_more_rounded,
+                                    color: AppTheme.primary, size: 16),
+                              ],
+                            ),
                           ),
                         ),
+
                         _monthNavBtn(Icons.chevron_right_rounded, _nextMonth,
-                          disabled: _selectedMonth.month == DateTime.now().month &&
-                              _selectedMonth.year == DateTime.now().year),
+                            disabled: isCurrentMonth),
                       ],
                     ),
                   ),
@@ -253,7 +505,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       ),
       child: Stack(
         children: [
-          // Background glow orb
           Positioned(
             top: -20,
             right: -20,
@@ -336,7 +587,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 ),
               ),
               const SizedBox(height: 16),
-              // Divider line
               Container(
                 height: 1,
                 decoration: BoxDecoration(
@@ -461,7 +711,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
 
           const SizedBox(height: 20),
 
-          // Category legend
           ...categories.asMap().entries.map((entry) {
             final i = entry.key;
             final cat = entry.value;
@@ -616,7 +865,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Glow behind pie
           Container(
             width: 200,
             height: 200,

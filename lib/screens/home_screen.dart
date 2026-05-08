@@ -12,39 +12,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  late AnimationController _fabController;
-  late Animation<double> _fabScale;
 
   final _screens = const [
     DashboardScreen(),
     HistoryScreen(),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _fabController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 180),
-    );
-    _fabScale = Tween<double>(begin: 1.0, end: 0.88).animate(
-      CurvedAnimation(parent: _fabController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _fabController.dispose();
-    super.dispose();
-  }
-
-  void _openAddExpense() async {
+  void _openAddExpense() {
     HapticFeedback.mediumImpact();
-    await _fabController.forward();
-    await _fabController.reverse();
-    if (!mounted) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -61,67 +38,53 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         index: _currentIndex,
         children: _screens,
       ),
-      floatingActionButton: GestureDetector(
-        onTap: _openAddExpense,
-        child: ScaleTransition(
-          scale: _fabScale,
-          child: Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.primaryLight, AppTheme.primary],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.primary.withOpacity(0.45),
-                  blurRadius: 24,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: AppTheme.primary.withOpacity(0.15),
-                  blurRadius: 40,
-                  spreadRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+      floatingActionButton: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: AppTheme.primary,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
             ),
-            child: const Icon(Icons.add_rounded, color: Color(0xFF1A1000), size: 28),
-          ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: _openAddExpense,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          border: Border(
-            top: BorderSide(color: AppTheme.border.withOpacity(0.8), width: 1),
-          ),
+          border: const Border(top: BorderSide(color: AppTheme.border)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
-              blurRadius: 30,
-              offset: const Offset(0, -8),
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
             ),
           ],
         ),
-        child: SafeArea(
-          top: false,
-          child: BottomAppBar(
-            color: AppTheme.surface,
-            elevation: 0,
-            notchMargin: 10,
-            shape: const CircularNotchedRectangle(),
-            padding: EdgeInsets.zero,
+        child: BottomAppBar(
+          color: AppTheme.surface,
+          elevation: 0,
+          notchMargin: 8,
+          shape: const CircularNotchedRectangle(),
+          child: SizedBox(
+            height: 60,
             child: Row(
               children: [
-                Expanded(child: _navItem(0, Icons.grid_view_rounded, Icons.grid_view_outlined, 'Overview')),
-                const SizedBox(width: 58),
-                Expanded(child: _navItem(1, Icons.receipt_long_rounded, Icons.receipt_long_outlined, 'Riwayat')),
+                Expanded(child: _navItem(0, Icons.dashboard_rounded, Icons.dashboard_outlined, 'Dashboard')),
+                const SizedBox(width: 60),
+                Expanded(child: _navItem(1, Icons.history_rounded, Icons.history_rounded, 'Riwayat')),
               ],
             ),
           ),
@@ -139,34 +102,28 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: isActive ? AppTheme.primary.withOpacity(0.12) : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
               child: Icon(
                 isActive ? activeIcon : inactiveIcon,
+                key: ValueKey(isActive),
                 color: isActive ? AppTheme.primary : AppTheme.textMuted,
                 size: 22,
               ),
             ),
             const SizedBox(height: 2),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 220),
+            Text(
+              label,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
                 color: isActive ? AppTheme.primary : AppTheme.textMuted,
-                letterSpacing: 0.3,
               ),
-              child: Text(label),
             ),
           ],
         ),
