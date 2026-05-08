@@ -264,6 +264,8 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> with SingleTickerProv
                             hintText: '0',
                             hintStyle: TextStyle(color: AppTheme.textMuted),
                             border: InputBorder.none,
+                            // FIX: Nonaktifkan fill agar warna TextField = warna container
+                            filled: false,
                             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
                           ),
                         ),
@@ -376,6 +378,8 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> with SingleTickerProv
                       hintText: 'Contoh: Nasi padang + es teh...',
                       hintStyle: TextStyle(color: AppTheme.textMuted, fontSize: 13),
                       border: InputBorder.none,
+                      // FIX: Nonaktifkan fill agar warna TextField = warna container
+                      filled: false,
                       prefixIcon: Icon(Icons.notes_rounded, color: AppTheme.textMuted, size: 18),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),

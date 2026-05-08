@@ -480,11 +480,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
+        // FIX: Ganti gradient dari warna ungu ke warna biru-gelap yang konsisten dengan tema
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF141022),
-            Color(0xFF0C1020),
-            Color(0xFF080A0F),
+            Color(0xFF141820), // sama dengan surfaceHigh
+            Color(0xFF0E1118), // sama dengan surface
+            Color(0xFF080A0F), // sama dengan bg
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -505,23 +506,6 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       ),
       child: Stack(
         children: [
-          Positioned(
-            top: -20,
-            right: -20,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTheme.primary.withOpacity(0.08),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -608,6 +592,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     AppTheme.primary,
                   ),
                   const SizedBox(width: 10),
+                  // FIX: Ganti accent (teal) → primary (gold) supaya konsisten
                   _statBadge(
                     '${provider.getExpensesForMonth(_selectedMonth.year, _selectedMonth.month).length}',
                     'Transaksi',
