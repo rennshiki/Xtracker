@@ -141,6 +141,65 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
 
+            Expanded(
+              child: ListView.builder
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.only(
+                  bottom: 100 + MediaQuery.of(context).padding.bottom,
+                  top: 8,
+                ),
+                itemCount: grouped.length,
+                itemBuilder: (ctx, i) {
+                  final dateLabel = grouped.keys.elementAt(i);
+                  final dayExpenses = grouped[dateLabel]!;
+                  final dayTotal = dayExpenses.fold(0.0, (s, e) => s + e.amount);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Date header
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceHigh,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppTheme.border),
+                              ),
+                              child: Text(
+                                dateLabel,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.textSecondary,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              CurrencyFormatter.format(dayTotal),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Items
+                      ...dayExpenses.map((expense) {
+                        final color = AppTheme.getCategoryColor(expense.category, allCategories);
+                        return _expenseItem(expense, color, provider, context);
+                      }),
+                    ],
+                  );
+                },
+              ),
+
           if (categories.isNotEmpty)
             Container(
               height: 1,
@@ -195,7 +254,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   )
                 : ListView.builder(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 100, top: 8),
+                    padding: EdgeInsets.only(
+                      bottom: 100 + MediaQuery.of(context).padding.bottom,
+                      top: 8,
+                    ),
                     itemCount: grouped.length,
                     itemBuilder: (ctx, i) {
                       final dateLabel = grouped.keys.elementAt(i);

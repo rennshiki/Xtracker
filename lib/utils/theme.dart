@@ -145,6 +145,6 @@ class AppIcons {
   };
 
   static String getIcon(String category) {
-    return categoryIcons[category] ?? 'assets/icons/cateogory.png';
+    return categoryIcons[category] ?? 'assets/icons/category.png';
   }
 }
